@@ -25,12 +25,12 @@ public class ProductController {
         this.productService = productService;
     }
 
-    @PostMapping("/add")
+    @PostMapping("")
     public ProductResponseDto addProduct(@RequestBody ProductRequestDto productRequestDto) {
         return productService.addProduct(productRequestDto);
     }
 
-    @GetMapping("/all")
+    @GetMapping("")
     public List<ProductResponseDto> getAllProducts() {
         return productService.getAllProducts();
     }
