@@ -1,24 +1,17 @@
 package com.rajendraelectronics.service;
 
-import org.springframework.stereotype.Service;
+import java.util.List;
 
-import com.rajendraelectronics.entity.Product;
-import com.rajendraelectronics.repository.ProductRepository;
+import com.rajendraelectronics.dto.ProductRequestDto;
+import com.rajendraelectronics.dto.ProductResponseDto;
 
-@Service
-public class ProductService {
-
-	private final ProductRepository productRepository;
-
-	public ProductService(ProductRepository productRepository) {
-		this.productRepository = productRepository;
-	}
-
-	public void createProduct(Product p) {
-		productRepository.save(p);
-	}
-
-	public Product getProduct(Long id) {
-		return productRepository.findById(id).orElse(null);
-	}
+public interface ProductService {
+	
+	ProductResponseDto addProduct(ProductRequestDto productRequestDto);
+	ProductResponseDto getProductById(Long productId);
+	ProductResponseDto updateProduct(Long productId, ProductRequestDto dto);
+	String deleteProduct(Long productId);
+	List<ProductResponseDto> getAllProducts();
+	
+	
 }

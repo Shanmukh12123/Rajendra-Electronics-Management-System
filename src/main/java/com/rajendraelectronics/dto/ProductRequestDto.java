@@ -1,5 +1,11 @@
 package com.rajendraelectronics.dto;
 
-public class ProductRequestDto {
-
-}
+public record ProductRequestDto(
+		String name,
+		String brand,
+        String category,
+        Double purchasePrice,
+        Double sellingPrice,
+        Integer quantityInStock,
+        Integer reorderThreshold
+        ) {}
