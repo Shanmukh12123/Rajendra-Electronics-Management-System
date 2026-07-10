@@ -22,7 +22,6 @@ public class Customer {
 	@NotBlank
 	private String customerName;
 
-	@NotBlank
 	@Pattern(regexp = "^\\d{10}$", message = "Mobile number must be 10 digits")
 	private String mobileNumber;
 
@@ -31,12 +30,9 @@ public class Customer {
 
 	private String address;
 
-	public Customer() {
-		super();
-	}
+	public Customer() {}
 
 	public Customer(Long id, String customerName, String mobileNumber, String email, String address) {
-		super();
 		this.id = id;
 		this.customerName = customerName;
 		this.mobileNumber = mobileNumber;
@@ -44,45 +40,20 @@ public class Customer {
 		this.address = address;
 	}
 
-	public Long getId() {
-		return id;
-	}
+	public Long getId() { return id; }
+	public void setId(Long id) { this.id = id; }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+	public String getCustomerName() { return customerName; }
+	public void setCustomerName(String customerName) { this.customerName = customerName; }
 
-	public String getCustomerName() {
-		return customerName;
-	}
+	public String getMobileNumber() { return mobileNumber; }
+	public void setMobileNumber(String mobileNumber) { this.mobileNumber = mobileNumber; }
 
-	public void setCustomerName(String customerName) {
-		this.customerName = customerName;
-	}
+	public String getEmail() { return email; }
+	public void setEmail(String email) { this.email = email; }
 
-	public String getMobileNumber() {
-		return mobileNumber;
-	}
-
-	public void setMobileNumber(String mobileNumber) {
-		this.mobileNumber = mobileNumber;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public String getAddress() {
-		return address;
-	}
-
-	public void setAddress(String address) {
-		this.address = address;
-	}
+	public String getAddress() { return address; }
+	public void setAddress(String address) { this.address = address; }
 
 	@Override
 	public String toString() {
@@ -97,12 +68,8 @@ public class Customer {
 
 	@Override
 	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
+		if (this == obj) return true;
+		if (obj == null || getClass() != obj.getClass()) return false;
 		Customer other = (Customer) obj;
 		return Objects.equals(address, other.address) && Objects.equals(customerName, other.customerName)
 				&& Objects.equals(email, other.email) && Objects.equals(id, other.id)
