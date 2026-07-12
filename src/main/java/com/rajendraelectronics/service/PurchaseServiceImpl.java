@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.rajendraelectronics.dto.PurchasePaymentDto;
 import com.rajendraelectronics.dto.PurchaseRequestDto;
 import com.rajendraelectronics.dto.PurchaseResponseDto;
 import com.rajendraelectronics.entity.Product;
@@ -32,36 +33,68 @@ public class PurchaseServiceImpl implements PurchaseService {
 		this.productRepository = productRepository;
 	}
 	
-    @Transactional
+	@Transactional
 	@Override
 	public PurchaseResponseDto addPurchase(PurchaseRequestDto dto) {
-		Supplier supplier = supplierRepository.findById(dto.supplierId())
-				.orElseThrow(() -> new RuntimeException("Supplier not found with id: " + dto.supplierId()));
 
-		Product product = productRepository.findById(dto.productId())
-				.orElseThrow(() -> new RuntimeException("Product not found with id: " + dto.productId()));
+	    Supplier supplier = supplierRepository.findById(dto.supplierId())
+	            .orElseThrow(() -> new RuntimeException(
+	                    "Supplier not found with id: " + dto.supplierId()));
 
-		Purchase purchase = new Purchase();
-		purchase.setSupplier(supplier);
-		purchase.setProduct(product);
-		purchase.setQuantity(dto.quantity());
-		purchase.setPurchasePrice(dto.purchasePrice());
+	    Product product = productRepository.findById(dto.productId())
+	            .orElseThrow(() -> new RuntimeException(
+	                    "Product not found with id: " + dto.productId()));
 
-		double total = dto.purchasePrice() * (dto.quantity() != null ? dto.quantity() : 0);
-		purchase.setTotalAmount(total);
-		purchase.setPurchaseDate(LocalDate.now());
+	    Purchase purchase = new Purchase();
 
-		// Inventory update
-		Integer currentStock = product.getQuantityInStock();
-		if (currentStock == null) currentStock = 0;
-		Integer addQty = dto.quantity() != null ? dto.quantity() : 0;
-		product.setQuantityInStock(currentStock + addQty);
+	    purchase.setSupplier(supplier);
+	    purchase.setProduct(product);
+	    purchase.setQuantity(dto.quantity());
+	    purchase.setPurchasePrice(dto.purchasePrice());
 
-		productRepository.save(product);
+	    // Calculate Total Amount
+	    double totalAmount = dto.purchasePrice()
+	            * (dto.quantity() != null ? dto.quantity() : 0);
 
-		Purchase saved = purchaseRepository.save(purchase);
+	    purchase.setTotalAmount(totalAmount);
 
-		return toResponseDto(saved);
+	    // Payment Calculation
+	   
+	    double paidAmount = dto.paidAmount() != null
+	            ? dto.paidAmount()
+	            : 0.0;
+
+	    // Validation
+	    if (paidAmount > totalAmount) {
+	        throw new RuntimeException(
+	                "Paid amount cannot be greater than total amount");
+	    }
+
+	    double remainingAmount = totalAmount - paidAmount;
+
+	    purchase.setPaidAmount(paidAmount);
+	    purchase.setRemainingAmount(remainingAmount);
+
+	    purchase.setPurchaseDate(LocalDate.now());
+
+	    // Inventory Update
+	    Integer currentStock = product.getQuantityInStock();
+
+	    if (currentStock == null) {
+	        currentStock = 0;
+	    }
+
+	    Integer addQty = dto.quantity() != null
+	            ? dto.quantity()
+	            : 0;
+
+	    product.setQuantityInStock(currentStock + addQty);
+
+	    productRepository.save(product);
+
+	    Purchase savedPurchase = purchaseRepository.save(purchase);
+
+	    return toResponseDto(savedPurchase);
 	}
 
 	@Override
@@ -89,17 +122,73 @@ public class PurchaseServiceImpl implements PurchaseService {
 	}
 
 	private PurchaseResponseDto toResponseDto(Purchase p) {
-		String supplierName = p.getSupplier() != null ? p.getSupplier().getSupplierName() : null;
-		String productName = p.getProduct() != null ? p.getProduct().getName() : null;
-		return new PurchaseResponseDto(
-				p.getId(),
-				supplierName,
-				productName,
-				p.getQuantity(),
-				p.getPurchasePrice(),
-				p.getTotalAmount(),
-				p.getPurchaseDate()
-		);
+
+	    String supplierName =
+	            p.getSupplier() != null
+	                    ? p.getSupplier().getSupplierName()
+	                    : null;
+
+	    String productName =
+	            p.getProduct() != null
+	                    ? p.getProduct().getName()
+	                    : null;
+
+	    return new PurchaseResponseDto(
+	            p.getId(),
+	            supplierName,
+	            productName,
+	            p.getQuantity(),
+	            p.getPurchasePrice(),
+	            p.getTotalAmount(),
+	            p.getPaidAmount(),
+	            p.getRemainingAmount(),
+	            p.getPurchaseDate()
+	    );
 	}
+	
+	@Override
+	@Transactional
+	public PurchaseResponseDto updatePurchasePayment(
+	        Long purchaseId,
+	        PurchasePaymentDto dto) {
+
+	    Purchase purchase = purchaseRepository.findById(purchaseId)
+	            .orElseThrow(() -> new RuntimeException(
+	                    "Purchase not found with id: " + purchaseId));
+
+	    Double paymentAmount = dto.amount();
+
+	    if (paymentAmount == null || paymentAmount <= 0) {
+	        throw new RuntimeException(
+	                "Payment amount must be greater than zero");
+	    }
+
+	    if (paymentAmount > purchase.getRemainingAmount()) {
+	        throw new RuntimeException(
+	                "Payment amount cannot be greater than remaining amount");
+	    }
+
+	    purchase.setPaidAmount(
+	            purchase.getPaidAmount() + paymentAmount);
+
+	    purchase.setRemainingAmount(
+	            purchase.getRemainingAmount() - paymentAmount);
+
+	    Purchase updatedPurchase =
+	            purchaseRepository.save(purchase);
+
+	    return toResponseDto(updatedPurchase);
+	}
+
+	@Override
+	public List<PurchaseResponseDto> getPendingPurchases() {
+		
+		 return purchaseRepository
+		            .findByRemainingAmountGreaterThan(0.0)
+		            .stream()
+		            .map(this::toResponseDto)
+		            .collect(Collectors.toList());
+	}
+
 
 }

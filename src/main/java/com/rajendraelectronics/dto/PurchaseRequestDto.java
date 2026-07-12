@@ -5,6 +5,7 @@ public record PurchaseRequestDto(
 		Long supplierId,
 		Long productId,
 		Integer quantity,
-		Double purchasePrice
+		Double purchasePrice,
+		Double paidAmount
 	)
 {}

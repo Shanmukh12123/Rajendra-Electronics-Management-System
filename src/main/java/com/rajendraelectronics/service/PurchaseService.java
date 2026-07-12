@@ -2,6 +2,7 @@ package com.rajendraelectronics.service;
 
 import java.util.List;
 
+import com.rajendraelectronics.dto.PurchasePaymentDto;
 import com.rajendraelectronics.dto.PurchaseRequestDto;
 import com.rajendraelectronics.dto.PurchaseResponseDto;
 
@@ -14,5 +15,11 @@ public interface PurchaseService {
 	List<PurchaseResponseDto> getAllPurchases();
 	
 	String deletePurchaseById(Long purchaseId);
+	
+	PurchaseResponseDto updatePurchasePayment(
+	        Long purchaseId,
+	        PurchasePaymentDto dto);
+	
+	List<PurchaseResponseDto> getPendingPurchases();
 	
 }

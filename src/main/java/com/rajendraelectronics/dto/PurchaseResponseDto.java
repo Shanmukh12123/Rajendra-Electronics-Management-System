@@ -10,6 +10,8 @@ public record PurchaseResponseDto(
 		Integer quantity,
 		Double purchasePrice,
 		Double totalAmount,
+		Double paidAmount,
+	    Double remainingAmount,
 		LocalDate purchaseDate
 	)
 {}
