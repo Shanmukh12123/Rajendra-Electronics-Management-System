@@ -5,6 +5,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
+import com.rajendraelectronics.dto.LowStockProductDto;
 import com.rajendraelectronics.dto.ProductRequestDto;
 import com.rajendraelectronics.dto.ProductResponseDto;
 import com.rajendraelectronics.entity.Product;
@@ -105,6 +106,23 @@ public class ProductServiceImplementation implements ProductService {
 						product.getReorderThreshold()
 				))
 				.collect(Collectors.toList());
+	}
+	
+	@Override
+	public List<LowStockProductDto> getLowStockProducts() {
+
+	    return productRepository.findAll()
+	            .stream()
+	            .filter(product ->
+	                    product.getQuantityInStock()
+	                    <= product.getReorderThreshold())
+	            .map(product -> new LowStockProductDto(
+	                    product.getId(),
+	                    product.getName(),
+	                    product.getBrand(),
+	                    product.getQuantityInStock(),
+	                    product.getReorderThreshold()))
+	            .toList();
 	}
 	
 }

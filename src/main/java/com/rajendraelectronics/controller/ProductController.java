@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.rajendraelectronics.dto.LowStockProductDto;
 import com.rajendraelectronics.dto.ProductRequestDto;
 import com.rajendraelectronics.dto.ProductResponseDto;
 import com.rajendraelectronics.service.ProductService;
@@ -49,5 +50,10 @@ public class ProductController {
 	public String deleteProduct(@PathVariable Long productId) {
 		return productService.deleteProduct(productId);
 	}
+    
+    @GetMapping("/low-stock")
+    public List<LowStockProductDto> getLowStockProducts() {
+        return productService.getLowStockProducts();
+    }
 
 }
